@@ -7,10 +7,12 @@ arch=('any')
 url="https://github.com/aminammar1/arch-shell-assistant"
 license=('MIT')
 depends=('python' 'python-openai' 'python-dotenv' 'python-rich')
-makedepends=('python-build' 'python-installer' 'python-hatchling')
-# After you push tag v$pkgver to GitHub, regenerate sums with: updpkgsums
-source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('d33dad87870cf3f144d5dad305fa299aee1cd2314d8ecf9f09bcd85fc2ce5c5b')
+makedepends=('git' 'python-build' 'python-installer' 'python-hatchling')
+# VCS source pinned to the release tag (SKIP is the norm for git sources;
+# GitHub archive tarballs are not byte-stable, so no hash is pinned).
+# Rule: never move tags after pushing.
+source=("$pkgname-$pkgver::git+$url.git#tag=v$pkgver")
+sha256sums=('SKIP')
 
 build() {
   cd "$pkgname-$pkgver"
