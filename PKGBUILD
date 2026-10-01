@@ -10,7 +10,7 @@ depends=('python' 'python-openai' 'python-dotenv' 'python-rich')
 makedepends=('python-build' 'python-installer' 'python-hatchling')
 # After you push tag v$pkgver to GitHub, regenerate sums with: updpkgsums
 source=("$pkgname-$pkgver.tar.gz::$url/archive/refs/tags/v$pkgver.tar.gz")
-sha256sums=('SKIP')
+sha256sums=('58460164e0015da8be2f5c8037e0a19855817a766020d15e80811049f2898632')
 
 build() {
   cd "$pkgname-$pkgver"
