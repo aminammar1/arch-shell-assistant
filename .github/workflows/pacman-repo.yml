@@ -1,0 +1,59 @@
+name: pacman-repo
+
+# On every version tag (v*), build the Arch package with makepkg,
+# update the pacman repo database, and publish both to gh-pages.
+# Users then install with: sudo pacman -S arch-shell-assistant
+# (after adding the [arch-shell-assistant] repo to pacman.conf once).
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+    steps:
+      - name: Install build tools
+        run: |
+          pacman -Syu --noconfirm --needed base-devel git sudo \
+            python-build python-installer python-hatchling \
+            python-openai python-dotenv python-rich
+
+      - name: Fetch release tag
+        run: |
+          git clone --depth 1 --branch "${GITHUB_REF_NAME}" \
+            "https://github.com/${GITHUB_REPOSITORY}.git" src
+
+      - name: Build package (makepkg refuses root, so use a builder user)
+        run: |
+          useradd -m builder
+          printf 'builder ALL=(ALL) NOPASSWD: ALL\n' >> /etc/sudoers
+          chown -R builder:builder src
+          cd src
+          runuser -u builder -- makepkg -sf --noconfirm
+          cp ./*.pkg.tar.zst "$GITHUB_WORKSPACE/"
+
+      - name: Update repo database and publish to gh-pages
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          rm -rf deploy
+          git clone --depth 1 --branch gh-pages \
+            "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git" \
+            deploy 2>/dev/null || (
+              mkdir deploy && cd deploy && git init -b gh-pages \
+              && git remote add origin "https://x-access-token:${GH_TOKEN}@github.com/${GITHUB_REPOSITORY}.git"
+            )
+          mkdir -p deploy/x86_64
+          cp ./*.pkg.tar.zst deploy/x86_64/
+          cd deploy/x86_64
+          repo-add arch-shell-assistant.db.tar.gz ./*.pkg.tar.zst
+          cd ..
+          git add -A
+          git -c user.name="github-actions" -c user.email="github-actions@github.com" \
+            commit -m "repo: ${GITHUB_REF_NAME}" || echo "nothing to commit"
+          git push -u origin gh-pages

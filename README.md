@@ -6,6 +6,17 @@ after confirmation.
 
 ## Install
 
+With pacman (add the repo once to `/etc/pacman.conf`):
+
+```ini
+[arch-shell-assistant]
+Server = https://aminammar1.github.io/arch-shell-assistant/x86_64
+```
+
+```bash
+sudo pacman -Syu arch-shell-assistant
+```
+
 From AUR (once published):
 
 ```bash
@@ -44,7 +55,8 @@ cp .env.example ~/.config/arch-shell-assistant/.env
 
 Config load order (lowest → highest priority):
 
-1. `$XDG_CONFIG_HOME/alien-x/.env` (fallback `~/.config/alien-x/.env`)
+1. `$XDG_CONFIG_HOME/arch-shell-assistant/.env` (fallback `~/.config/arch-shell-assistant/.env`;
+   legacy `.../alien-x/.env` also read)
 2. `./.env` (project-local override, optional)
 3. real environment variables (always win)
 
