@@ -8,3 +8,5 @@ build/
 src/*.egg-info/
 pkg/
 *.pkg.tar.zst
+
+aur-published.md
